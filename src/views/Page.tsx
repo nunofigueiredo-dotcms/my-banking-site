@@ -3,6 +3,7 @@
 import { DotCMSLayoutBody, useEditableDotCMSPage } from "@dotcms/react";
 import type { DotCMSComposedPageResponse, DotCMSPageResponse } from "@dotcms/types";
 import { pageComponents } from "@/components/content-types";
+import SiteDisclosures from "@/components/SiteDisclosures";
 import { dotCMSMode } from "@/utils/dotCMSClient";
 
 interface PageProps {
@@ -19,6 +20,7 @@ export function Page({ pageContent }: PageProps) {
         components={pageComponents}
         mode={dotCMSMode}
       />
+      <SiteDisclosures />
     </main>
   );
 }

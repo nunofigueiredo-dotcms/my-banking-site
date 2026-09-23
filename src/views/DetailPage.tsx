@@ -4,6 +4,8 @@ import DotCMSImage from "@/components/DotCMSImage";
 import { DotCMSBlockEditorRenderer, useEditableDotCMSPage } from "@dotcms/react";
 import type { DotCMSComposedPageResponse, DotCMSPageResponse } from "@dotcms/types";
 import type { BlogURLContentMap } from "@/types/blog";
+import Link from "next/link";
+import { SITE_NAME } from "@/utils/structuredData";
 
 interface DetailPageProps {
   pageContent: DotCMSComposedPageResponse<DotCMSPageResponse>;
@@ -30,6 +32,8 @@ export function DetailPage({ pageContent }: DetailPageProps) {
           </time>
         )}
 
+        <span className="detail-page__byline">By the {SITE_NAME} Editorial Team</span>
+
         {image && (
           <div className="detail-page__image">
             <DotCMSImage src={image} width={800} height={400} alt={title || ""} />
@@ -39,6 +43,11 @@ export function DetailPage({ pageContent }: DetailPageProps) {
         {body?.json && (
           <DotCMSBlockEditorRenderer blocks={body.json} className="detail-page__body" />
         )}
+
+        <p className="detail-page__more">
+          Keep reading: <Link href="/blog">more money guides</Link> ·{" "}
+          <Link href="/">compare our accounts</Link>
+        </p>
       </article>
     </main>
   );

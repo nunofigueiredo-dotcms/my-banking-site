@@ -8,6 +8,10 @@ const DOTCMS_HOSTNAME = DOTCMS_HOST?.replace(/^https?:\/\//, "");
 
 const nextConfig: NextConfig = {
   reactStrictMode: false,
+  // Next streams metadata into <body> for clients it doesn't recognize as bots.
+  // SEO/GEO scanners (including dotCMS's) then find no <title>, description or
+  // canonical in <head>, so render it in <head> for every request.
+  htmlLimitedBots: /.*/,
   images: {
     loader: "custom",
     loaderFile: "./src/utils/imageLoader.ts",

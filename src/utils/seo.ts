@@ -1,14 +1,25 @@
 import type { Metadata } from "next";
 
-function getBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_SITE_URL || "";
+/**
+ * The public origin, used for canonical URLs, Open Graph and JSON-LD.
+ * Falls back to Vercel's production domain when NEXT_PUBLIC_SITE_URL isn't set.
+ */
+export function getBaseUrl(): string {
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  }
+  return "";
 }
 
-function toAbsoluteUrl(path: string): string {
+export function toAbsoluteUrl(path: string): string {
   const base = getBaseUrl().replace(/\/$/, "");
   const pathStr = path.startsWith("/") ? path : `/${path}`;
   return pathStr === "/" ? base : `${base}${pathStr}`;
 }
+
+/** Shown in social previews when a page has no image of its own. */
+const DEFAULT_OG_IMAGE = "/og-default.jpg";
 
 export function buildPageMetadata({
   title,
@@ -24,6 +35,7 @@ export function buildPageMetadata({
   type?: "website" | "article";
 }): Metadata {
   const url = toAbsoluteUrl(path || "/") || undefined;
+  const image = toAbsoluteUrl(imageUrl || DEFAULT_OG_IMAGE);
   return {
     title: title || "Page",
     description,
@@ -33,12 +45,13 @@ export function buildPageMetadata({
       description,
       url,
       type,
-      ...(imageUrl && { images: [{ url: imageUrl }] }),
+      images: [{ url: image }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
+      images: [image],
     },
   };
 }

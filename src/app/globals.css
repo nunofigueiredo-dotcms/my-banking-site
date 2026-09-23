@@ -638,6 +638,43 @@
     @apply w-full h-auto object-cover rounded-xl;
   }
 
+  .detail-page__byline {
+    @apply block text-muted-foreground text-sm -mt-6 mb-2;
+  }
+
+  .detail-page__more {
+    @apply mt-12 pt-6 border-t border-border text-sm;
+  }
+
+  .detail-page__more a {
+    @apply text-primary hover:text-primary-dark font-medium;
+  }
+
+  /* ── Disclosures ─────────────────────────── */
+  .site-disclosures {
+    @apply w-full max-w-6xl mx-auto px-4 py-10 text-xs leading-relaxed text-muted-foreground border-t border-border;
+  }
+
+  .site-disclosures h2 {
+    @apply text-sm font-semibold text-foreground mb-3;
+  }
+
+  .site-disclosures ul {
+    @apply space-y-1.5;
+  }
+
+  .site-disclosures a {
+    @apply underline hover:text-primary;
+  }
+
+  .site-disclosures__links {
+    @apply flex flex-wrap gap-x-6 gap-y-2 mt-4 text-sm;
+  }
+
+  .site-disclosures__links a {
+    @apply no-underline text-primary hover:text-primary-dark font-medium;
+  }
+
   /* ── BankProduct ──────────────────────
      Mirrors .bank-card: the rate outranks the title, the CTA is pushed to the
      bottom so a row of uneven cards lines up. */

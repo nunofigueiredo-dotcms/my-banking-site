@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { buildSlots } from "@dotcms/react";
-import { getDotCMSPage } from "@/utils/getDotCMSPage";
+import { getDotCMSPage, getPageSeoDescription } from "@/utils/getDotCMSPage";
 import { navigationQuery } from "@/utils/queries";
 import { buildPageMetadata } from "@/utils/seo";
+import { webPageJsonLd } from "@/utils/structuredData";
+import JsonLd from "@/components/JsonLd";
 import { BlogListingPage } from "@/views/BlogListingPage";
 import BlogList from "@/components/content-types/BlogList";
 import Header from "@/components/Header";
@@ -19,13 +21,16 @@ function getBlogTitle(page?: { friendlyName?: string; title?: string }): string 
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    const pageData = await getDotCMSPage(PATH, { content: { navigation: navigationQuery } });
+    const [pageData, seoDescription] = await Promise.all([
+      getDotCMSPage(PATH, { content: { navigation: navigationQuery } }),
+      getPageSeoDescription(PATH),
+    ]);
     if (!pageData) return { title: "Not found" };
 
     const page = pageData.pageAsset?.page;
     return buildPageMetadata({
       title: getBlogTitle(page),
-      description: page?.seodescription || FALLBACK_DESCRIPTION,
+      description: seoDescription || FALLBACK_DESCRIPTION,
       path: PATH,
     });
   } catch {
@@ -34,7 +39,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function BlogPage() {
-  const pageContent = await getDotCMSPage(PATH, { content: { navigation: navigationQuery } });
+  const [pageContent, seoDescription] = await Promise.all([
+    getDotCMSPage(PATH, { content: { navigation: navigationQuery } }),
+    getPageSeoDescription(PATH),
+  ]);
   if (!pageContent) return notFound();
 
   const layout = pageContent.pageAsset?.layout;
@@ -44,8 +52,18 @@ export default async function BlogPage() {
     BlogList,
   });
 
+  const page = pageContent.pageAsset?.page;
+
   return (
     <>
+      <JsonLd
+        data={webPageJsonLd({
+          path: PATH,
+          title: getBlogTitle(page),
+          description: seoDescription || FALLBACK_DESCRIPTION,
+          type: "CollectionPage",
+        })}
+      />
       {layout?.header && <Header navItems={navItems} />}
       <BlogListingPage pageContent={pageContent} slots={slots} />
       {layout?.footer && <Footer />}

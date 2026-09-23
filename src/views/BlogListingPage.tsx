@@ -4,6 +4,7 @@ import { ReactNode } from "react";
 import { DotCMSLayoutBody, useEditableDotCMSPage } from "@dotcms/react";
 import type { DotCMSComposedPageResponse, DotCMSPageResponse } from "@dotcms/types";
 import { pageComponents } from "@/components/content-types";
+import SiteDisclosures from "@/components/SiteDisclosures";
 
 interface BlogListingPageProps {
   pageContent: DotCMSComposedPageResponse<DotCMSPageResponse>;
@@ -21,6 +22,7 @@ export function BlogListingPage({ pageContent, slots }: BlogListingPageProps) {
         components={pageComponents}
         slots={slots}
       />
+      <SiteDisclosures />
     </main>
   );
 }

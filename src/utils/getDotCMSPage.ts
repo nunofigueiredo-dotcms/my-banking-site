@@ -23,3 +23,21 @@ export const getDotCMSPage = cache(
     }
   }
 );
+
+/**
+ * The page's SEO description. The SDK's default page query doesn't select it,
+ * and adding a `page` GraphQL fragment to the main request switches container
+ * content to GraphQL too (dropping Block Editor bodies), so it's fetched apart.
+ */
+export const getPageSeoDescription = cache(async (path: string): Promise<string | undefined> => {
+  try {
+    const pageData = await dotCMSClient.page.get(path, {
+      graphql: { page: "seodescription" },
+      ...(dotCMSLanguageId ? { languageId: dotCMSLanguageId } : {}),
+    });
+    const description = (pageData.pageAsset?.page as { seodescription?: string } | undefined)?.seodescription;
+    return description || undefined;
+  } catch {
+    return undefined;
+  }
+});

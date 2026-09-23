@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { SITE_NAME } from "@/utils/structuredData";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: { default: "Site", template: "%s" },
-  description: "",
+  title: { default: SITE_NAME, template: `%s | ${SITE_NAME}` },
+  authors: [{ name: `${SITE_NAME} Editorial Team` }],
 };
 
 export default function RootLayout({

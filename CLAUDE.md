@@ -41,7 +41,11 @@ registry maps both names. It also returns Block Editor fields as JSON strings, w
 - All dotCMS types come from `@dotcms/types`; no `any` types
 - Path alias `@/*` → `src/*`
 - Tailwind CSS 4 + Radix UI/Shadcn components
-- `generateMetadata()` and JSON-LD structured data are generated per-page in the catch-all route
+- `generateMetadata()` builds per-page metadata; JSON-LD (`src/utils/structuredData.ts`,
+  rendered by `src/components/JsonLd.tsx`) is emitted by the catch-all, blog listing and
+  blog post routes — `BankOrCreditUnion` + `WebSite` + the page (`WebPage`/`AboutPage`/
+  `CollectionPage`/`BlogPosting`) + `BreadcrumbList`. The bank name comes from
+  `NEXT_PUBLIC_SITE_NAME` (default "World Demo Bank")
 
 ## Content-type components
 

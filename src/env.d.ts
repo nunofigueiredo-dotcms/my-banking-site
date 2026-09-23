@@ -6,5 +6,6 @@ declare namespace NodeJS {
     NEXT_PUBLIC_DOTCMS_LANGUAGE_ID?: string;
     NEXT_PUBLIC_DOTCMS_BLOG_TYPE?: string;
     NEXT_PUBLIC_SITE_URL?: string;
+    NEXT_PUBLIC_SITE_NAME?: string;
   }
 }
