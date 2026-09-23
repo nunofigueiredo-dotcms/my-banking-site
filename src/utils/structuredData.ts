@@ -4,8 +4,10 @@ import { toAbsoluteUrl } from "@/utils/seo";
  * schema.org JSON-LD for every page, so search and AI engines can tell what the
  * site is (a bank), what each page is, and who published it.
  *
- * Each page emits one `@graph`: the bank, the website, the page itself and its
- * breadcrumb trail. Nodes reference each other by `@id` rather than repeating.
+ * Each page emits the bank, the website, the page itself and its breadcrumb
+ * trail, linked to each other by `@id`. They go out as separate top-level blocks
+ * rather than one `@graph`: both are valid schema.org, but some GEO scanners
+ * (including dotCMS's) only validate blocks with a top-level `@type`.
  */
 
 type JsonLdNode = Record<string, unknown>;
@@ -58,8 +60,11 @@ function breadcrumbs(path: string, title?: string): JsonLdNode {
   };
 }
 
-function graph(...nodes: JsonLdNode[]): JsonLdNode {
-  return { "@context": "https://schema.org", "@graph": [organization(), website(), ...nodes] };
+function blocks(...nodes: JsonLdNode[]): JsonLdNode[] {
+  return [organization(), website(), ...nodes].map((node) => ({
+    "@context": "https://schema.org",
+    ...node,
+  }));
 }
 
 export function webPageJsonLd({
@@ -72,10 +77,10 @@ export function webPageJsonLd({
   title?: string;
   description?: string;
   type?: "WebPage" | "CollectionPage" | "AboutPage";
-}): JsonLdNode {
+}): JsonLdNode[] {
   const url = toAbsoluteUrl(path);
   const name = title || SITE_NAME;
-  return graph(
+  return blocks(
     {
       "@type": type,
       "@id": `${url}#webpage`,
@@ -105,9 +110,9 @@ export function blogPostingJsonLd({
   imageUrl?: string;
   datePublished?: string;
   dateModified?: string;
-}): JsonLdNode {
+}): JsonLdNode[] {
   const url = toAbsoluteUrl(path);
-  return graph(
+  return blocks(
     {
       "@type": "BlogPosting",
       "@id": `${url}#article`,
