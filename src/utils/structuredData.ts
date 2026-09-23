@@ -18,6 +18,13 @@ const siteUrl = () => toAbsoluteUrl("/");
 const organizationId = () => `${siteUrl()}/#organization`;
 const websiteId = () => `${siteUrl()}/#website`;
 
+/** dotCMS dates arrive as epoch millis or date strings; JSON-LD wants ISO 8601. */
+export function toIsoDate(value?: number | string): string | undefined {
+  if (value === undefined || value === "") return undefined;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
+}
+
 function organization(): JsonLdNode {
   return {
     "@type": "BankOrCreditUnion",
@@ -71,11 +78,15 @@ export function webPageJsonLd({
   path,
   title,
   description,
+  datePublished,
+  dateModified,
   type = "WebPage",
 }: {
   path: string;
   title?: string;
   description?: string;
+  datePublished?: string;
+  dateModified?: string;
   type?: "WebPage" | "CollectionPage" | "AboutPage";
 }): JsonLdNode[] {
   const url = toAbsoluteUrl(path);
@@ -87,6 +98,8 @@ export function webPageJsonLd({
       url,
       name,
       ...(description && { description }),
+      ...(datePublished && { datePublished }),
+      ...((dateModified || datePublished) && { dateModified: dateModified || datePublished }),
       inLanguage: "en-US",
       isPartOf: { "@id": websiteId() },
       about: { "@id": organizationId() },

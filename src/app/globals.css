@@ -642,8 +642,24 @@
     @apply block text-muted-foreground text-sm -mt-6 mb-2;
   }
 
+  .detail-page__related {
+    @apply mt-12 pt-6 border-t border-border;
+  }
+
+  .detail-page__related h2 {
+    @apply text-lg font-semibold text-foreground mb-3;
+  }
+
+  .detail-page__related ul {
+    @apply space-y-2;
+  }
+
+  .detail-page__related a {
+    @apply text-primary hover:text-primary-dark font-medium;
+  }
+
   .detail-page__more {
-    @apply mt-12 pt-6 border-t border-border text-sm;
+    @apply mt-8 text-sm;
   }
 
   .detail-page__more a {

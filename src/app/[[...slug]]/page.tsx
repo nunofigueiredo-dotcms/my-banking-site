@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { getDotCMSPage, getPageSeoDescription } from "@/utils/getDotCMSPage";
 import { navigationQuery } from "@/utils/queries";
 import { buildPageMetadata } from "@/utils/seo";
-import { webPageJsonLd } from "@/utils/structuredData";
+import { toIsoDate, webPageJsonLd } from "@/utils/structuredData";
 import JsonLd from "@/components/JsonLd";
 import { Page } from "@/views/Page";
 import Header from "@/components/Header";
@@ -72,6 +72,9 @@ export default async function CatchAllPage({ params, searchParams }: PageProps) 
           path,
           title: page?.friendlyName || page?.title,
           description: seoDescription,
+          // creationDate is in the page API response but not in the SDK's DotCMSPage type.
+          datePublished: toIsoDate((page as { creationDate?: number } | undefined)?.creationDate),
+          dateModified: toIsoDate(page?.modDate),
           type: path.startsWith("/about") ? "AboutPage" : "WebPage",
         })}
       />

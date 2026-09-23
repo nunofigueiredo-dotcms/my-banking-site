@@ -25,6 +25,7 @@ import type { DotCMSURLContentMap, BlockEditorNode } from "@dotcms/types";
 // DotCMSBasicContentlet has body?: string, but blog returns a BlockEditorNode at runtime.
 // Use Omit to override body with the correct type.
 export type BlogURLContentMap = Omit<DotCMSURLContentMap, "body"> & {
+  urlTitle?: string;
   description?: string;
   publishDate?: number;
   body?: { json: BlockEditorNode };

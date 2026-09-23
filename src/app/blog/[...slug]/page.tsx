@@ -3,18 +3,13 @@ import type { Metadata } from "next";
 import { getDotCMSPage } from "@/utils/getDotCMSPage";
 import { blogDetailGraphQL } from "@/utils/queries";
 import { buildPageMetadata } from "@/utils/seo";
-import { blogPostingJsonLd } from "@/utils/structuredData";
+import { blogPostingJsonLd, toIsoDate } from "@/utils/structuredData";
+import { getRelatedPosts } from "@/utils/blogPosts";
 import JsonLd from "@/components/JsonLd";
 import { DetailPage } from "@/views/DetailPage";
 import type { BlogURLContentMap } from "@/types/blog";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-
-function toIsoDate(value?: number | string): string | undefined {
-  if (value === undefined || value === "") return undefined;
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
-}
 
 interface PageProps {
   params: Promise<{ slug: string[] }>;
@@ -54,6 +49,7 @@ export default async function BlogDetailPage({ params }: PageProps) {
   const layout = pageContent.pageAsset?.layout;
   const navItems = pageContent.content?.navigation?.children ?? [];
   const post = pageContent.pageAsset?.urlContentMap as BlogURLContentMap | undefined;
+  const related = await getRelatedPosts(post?.urlTitle);
 
   return (
     <>
@@ -72,7 +68,7 @@ export default async function BlogDetailPage({ params }: PageProps) {
       {layout?.header && (
         <Header navItems={navItems} />
       )}
-      <DetailPage pageContent={pageContent} />
+      <DetailPage pageContent={pageContent} related={related} />
       {layout?.footer && <Footer />}
     </>
   );

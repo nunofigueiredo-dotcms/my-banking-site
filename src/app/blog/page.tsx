@@ -4,7 +4,7 @@ import { buildSlots } from "@dotcms/react";
 import { getDotCMSPage, getPageSeoDescription } from "@/utils/getDotCMSPage";
 import { navigationQuery } from "@/utils/queries";
 import { buildPageMetadata } from "@/utils/seo";
-import { webPageJsonLd } from "@/utils/structuredData";
+import { toIsoDate, webPageJsonLd } from "@/utils/structuredData";
 import JsonLd from "@/components/JsonLd";
 import { BlogListingPage } from "@/views/BlogListingPage";
 import BlogList from "@/components/content-types/BlogList";
@@ -61,6 +61,9 @@ export default async function BlogPage() {
           path: PATH,
           title: getBlogTitle(page),
           description: seoDescription || FALLBACK_DESCRIPTION,
+          // creationDate is in the page API response but not in the SDK's DotCMSPage type.
+          datePublished: toIsoDate((page as { creationDate?: number } | undefined)?.creationDate),
+          dateModified: toIsoDate(page?.modDate),
           type: "CollectionPage",
         })}
       />

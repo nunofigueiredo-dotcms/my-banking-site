@@ -6,12 +6,14 @@ import type { DotCMSComposedPageResponse, DotCMSPageResponse } from "@dotcms/typ
 import type { BlogURLContentMap } from "@/types/blog";
 import Link from "next/link";
 import { SITE_NAME } from "@/utils/structuredData";
+import type { RelatedPost } from "@/utils/blogPosts";
 
 interface DetailPageProps {
   pageContent: DotCMSComposedPageResponse<DotCMSPageResponse>;
+  related?: RelatedPost[];
 }
 
-export function DetailPage({ pageContent }: DetailPageProps) {
+export function DetailPage({ pageContent, related = [] }: DetailPageProps) {
   const editablePage = useEditableDotCMSPage(pageContent);
   const pageAsset = editablePage?.pageAsset;
   const { title, image, body, publishDate } =
@@ -42,6 +44,19 @@ export function DetailPage({ pageContent }: DetailPageProps) {
 
         {body?.json && (
           <DotCMSBlockEditorRenderer blocks={body.json} className="detail-page__body" />
+        )}
+
+        {related.length > 0 && (
+          <section className="detail-page__related" aria-labelledby="related-heading">
+            <h2 id="related-heading">Related articles</h2>
+            <ul>
+              {related.map((post) => (
+                <li key={post.href}>
+                  <Link href={post.href}>{post.title}</Link>
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
 
         <p className="detail-page__more">
