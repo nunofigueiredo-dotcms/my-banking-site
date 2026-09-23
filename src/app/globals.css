@@ -138,7 +138,60 @@
 .dot-row-container {
   max-width: 1160px;
   margin: 0 auto;
+  padding-inline: 1rem;
 }
+
+/* Card rows need breathing room between columns and when they stack. */
+.dot-row-container [data-dot-object="row"] {
+  gap: 1.5rem;
+  row-gap: 1.5rem;
+}
+
+/* Alternating bands give the page the rhythm a flat white column lacks.
+   The 9 rows in order: 1 hero, 2 products-heading, 3 products-cards,
+   4 solutions-heading, 5 solutions-cards, 6 simulators-heading,
+   7 simulators-cards, 8 info-heading, 9 info-cards.
+   Sections 4+5 (solutions) and 8+9 (banking with us) sit on tinted
+   full-bleed grounds; the heading row and its card row are tinted together.
+
+   Each row keeps its normal .dot-row-container py-6/py-8 (that's what
+   separates the heading from its cards) - only the OUTER edge that faces
+   the opposite-colour band gets zeroed and replaced with the band's own
+   4rem lead-in/lead-out, so bands don't merge or lose the internal gap. */
+#dot-section-4,
+#dot-section-5,
+#dot-section-8,
+#dot-section-9 {
+  position: relative;
+  max-width: none;
+}
+
+#dot-section-4::before,
+#dot-section-5::before,
+#dot-section-8::before,
+#dot-section-9::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--muted);
+  z-index: -1;
+}
+
+#dot-section-4 > *,
+#dot-section-5 > *,
+#dot-section-8 > *,
+#dot-section-9 > * {
+  max-width: 1160px;
+  margin-inline: auto;
+}
+
+/* Band lead-in/lead-out: heading row loses its top padding (replaced by the
+   band's own 4rem), card row loses its bottom padding likewise. The seam
+   between the heading and its cards - each row's OTHER edge - is untouched. */
+#dot-section-4 { padding-top: 4rem; }
+#dot-section-5 { padding-bottom: 4rem; }
+#dot-section-8 { padding-top: 4rem; }
+#dot-section-9 { padding-bottom: 4rem; }
 
 @media (max-width: 767px) {
   [class*="Column-module_col-end-"] {
@@ -151,7 +204,12 @@
 
   /* ── Shared ─────────────────────────────── */
   .page-main {
-    @apply container m-auto py-12 md:py-16 lg:py-20;
+    @apply m-auto;
+  }
+
+  /* Each layout row is a section band; spacing lives here, not on the page. */
+  .dot-row-container {
+    @apply py-6 md:py-8;
   }
 
   /* ── Header ─────────────────────────────── */
@@ -244,12 +302,23 @@
     @apply max-w-4xl mx-auto px-4 text-center;
   }
 
-  .banner h1 {
+  .banner h1,
+  .banner__title {
     @apply text-foreground text-3xl md:text-4xl lg:text-6xl font-semibold leading-tight mb-4;
   }
 
-  .banner p {
+  .banner p,
+  .banner__caption {
     @apply text-muted-foreground text-base lg:text-lg font-medium leading-relaxed max-w-lg mx-auto mb-8;
+  }
+
+  /* The editable value is a single inline <span> on the live site; make it a
+     block so the wrapper's centring and max-width govern it, as they did the
+     original h1/p. Scoped to the span so it can't split TinyMCE's internals
+     into separately-centred blocks (which staircases the wrapped lines). */
+  .banner__title > span,
+  .banner__caption > span {
+    @apply block;
   }
 
   .banner__cta {
@@ -262,6 +331,150 @@
 
   .banner__image img {
     @apply w-full h-auto max-h-[500px] object-cover rounded-xl;
+  }
+
+  /* ── Section Heading ─────────────────────── */
+  .section-heading {
+    @apply max-w-2xl mx-auto px-4 text-center mb-10 md:mb-12;
+  }
+
+  .section-heading__eyebrow {
+    @apply text-primary text-xs font-semibold uppercase tracking-[0.14em] mb-3;
+  }
+
+  .section-heading__title {
+    @apply text-foreground text-2xl md:text-3xl lg:text-4xl font-semibold leading-tight;
+  }
+
+  .section-heading__subtitle {
+    @apply text-muted-foreground text-base md:text-lg leading-relaxed mt-3;
+  }
+
+  /* ── Bank Card ───────────────────────────── */
+  .bank-card {
+    @apply relative flex flex-col h-full p-6 rounded-2xl border bg-card
+           transition-all duration-200 hover:-translate-y-1 hover:shadow-xl;
+    border-color: var(--border);
+  }
+
+  .bank-card:hover {
+    border-color: var(--primary);
+  }
+
+  /* Image cards: media bleeds to the card edges, text sits below. */
+  .bank-card--with-image {
+    @apply p-0 overflow-hidden;
+  }
+
+  /* overflow-hidden lives on a wrapper around just the <img>, not on
+     .bank-card__media itself - the icon chip below needs to overflow past
+     the media box's bottom edge without being clipped by it. */
+  .bank-card__media {
+    @apply relative w-full;
+  }
+
+  .bank-card__media__frame {
+    @apply w-full aspect-[16/10] overflow-hidden bg-muted;
+  }
+
+  .bank-card__media img {
+    @apply w-full h-full object-cover transition-transform duration-500;
+  }
+
+  .bank-card--with-image:hover .bank-card__media img {
+    @apply scale-105;
+  }
+
+  /* Over an image the icon becomes a floating chip straddling the image's
+     bottom edge. .bank-card__media has no explicit height of its own - it
+     is exactly as tall as .bank-card__media__frame (the icon is absolute,
+     out of flow, so it doesn't add height) - so top:100% lands precisely on
+     the frame's bottom edge, and translate-y(-50%) centers the chip on it. */
+  .bank-card__media .bank-card__icon {
+    @apply absolute left-6 mb-0 shadow-md;
+    top: 100%;
+    transform: translateY(-50%);
+    background-color: var(--card);
+    color: var(--primary);
+  }
+
+  .bank-card--with-image .bank-card__figure,
+  .bank-card--with-image .bank-card__title,
+  .bank-card--with-image .bank-card__body,
+  .bank-card--with-image .bank-card__cta {
+    @apply px-6;
+  }
+
+  /* .bank-card__figure and .bank-card__title are never actually
+     :first-child on an image card - .bank-card__media is always first in
+     the DOM - so target them directly. Whichever one follows the media
+     block needs enough top clearance to sit below the icon chip, which
+     protrudes 24px under the image (half its 48px height, via
+     translateY(-50%)); pt-10 (40px) clears that with a visible gap. */
+  .bank-card--with-image .bank-card__figure,
+  .bank-card--with-image .bank-card__media + .bank-card__title {
+    @apply pt-10;
+  }
+
+  .bank-card--with-image .bank-card__cta {
+    @apply pb-6;
+  }
+
+  .bank-card__icon {
+    @apply inline-flex items-center justify-center w-12 h-12 rounded-xl mb-5 shrink-0;
+    background-color: var(--secondary);
+    color: var(--primary);
+  }
+
+  .bank-card__icon svg {
+    @apply w-6 h-6;
+  }
+
+  /* The rate is what a bank leads with, so it outranks the title. */
+  .bank-card__figure {
+    @apply flex items-baseline gap-2 mb-2;
+  }
+
+  .bank-card__figure-value {
+    @apply text-3xl lg:text-4xl font-semibold tracking-tight;
+    color: var(--primary);
+  }
+
+  .bank-card__figure-label {
+    @apply text-muted-foreground text-xs font-medium uppercase tracking-wider;
+  }
+
+  .bank-card__title {
+    @apply text-foreground text-lg font-semibold leading-snug mb-2;
+  }
+
+  .bank-card__body {
+    @apply text-muted-foreground text-sm leading-relaxed mb-5;
+  }
+
+  /* Pushed to the bottom so CTAs line up across a row of uneven cards. */
+  .bank-card__cta {
+    @apply mt-auto inline-flex items-center gap-1.5 text-sm font-semibold
+           transition-colors;
+    color: var(--primary);
+  }
+
+  .bank-card__cta:hover {
+    color: var(--primary-dark);
+  }
+
+  .bank-card__cta span {
+    @apply transition-transform duration-200;
+  }
+
+  .bank-card:hover .bank-card__cta span {
+    @apply translate-x-1;
+  }
+
+  /* Highlight variant for the one offer a section wants to push. */
+  .bank-card--highlight {
+    background-color: var(--muted);
+    border-color: var(--accent);
   }
 
   /* ── Blog Card ───────────────────────────── */
@@ -424,4 +637,113 @@
   .detail-page__image img {
     @apply w-full h-auto object-cover rounded-xl;
   }
+
+  /* ── BankProduct ──────────────────────
+     Mirrors .bank-card: the rate outranks the title, the CTA is pushed to the
+     bottom so a row of uneven cards lines up. */
+  .bank-product {
+    @apply flex flex-col h-full p-6 rounded-xl bg-white border;
+    border-color: var(--border);
+  }
+
+  .bank-product__media {
+    @apply -mx-6 -mt-6 mb-5 overflow-hidden rounded-t-xl;
+  }
+
+  .bank-product__media img {
+    @apply w-full h-auto object-cover;
+  }
+
+  .bank-product__rate {
+    @apply flex items-baseline gap-2 mb-2;
+  }
+
+  .bank-product__rate-value {
+    @apply text-3xl lg:text-4xl font-semibold tracking-tight tabular-nums;
+    color: var(--primary);
+  }
+
+  .bank-product__rate-label {
+    @apply text-muted-foreground text-xs font-medium uppercase tracking-wider;
+  }
+
+  .bank-product__title {
+    @apply text-foreground text-lg font-semibold leading-snug mb-2;
+  }
+
+  .bank-product__summary {
+    @apply text-muted-foreground text-sm leading-relaxed mb-4;
+  }
+
+  .bank-product__benefits {
+    @apply text-muted-foreground text-sm leading-relaxed mb-5 space-y-1.5 list-none;
+  }
+
+  .bank-product__benefits li {
+    @apply relative pl-5;
+  }
+
+  .bank-product__benefits li::before {
+    content: "";
+    @apply absolute left-0 top-2 w-2 h-2 rounded-full;
+    background-color: var(--primary);
+  }
+
+  .bank-product__cta {
+    @apply mt-auto inline-flex items-center gap-1.5 text-sm font-semibold transition-colors;
+    color: var(--primary);
+  }
+
+  .detail-page__lead {
+    @apply text-lg leading-relaxed mb-6;
+    color: var(--muted-foreground);
+  }
+
+  .bank-product__cta:hover {
+    color: var(--primary-dark);
+  }
+
+  /* Unfilled regulatory copy must stay visible, never silently dropped. */
+  .bank-product__legal--todo {
+    @apply mt-4 pt-3 text-xs font-medium uppercase tracking-wider border-t;
+    border-color: var(--border);
+    color: #b45309;
+  }
+}
+
+/* ── UVE inline editing ──────────────────────
+   TinyMCE builds its own DOM at runtime (wrapper div > .mce-content-body >
+   <p>), so these class names never appear in source and Tailwind would prune
+   them from @layer components — hence plain CSS outside the layer.
+
+   Only the <p>'s own default margins need clearing; everything else must be
+   left alone so each field inherits its wrapper's responsive type naturally.
+   (A `font: inherit` shorthand here collapses the responsive sizes and blows
+   the heading up.) */
+/* Every node TinyMCE injects between .banner__title/.banner__caption and the
+   text: its outlined wrapper, .mce-content-body, and the <p> it wraps content
+   in. TinyMCE ships its own stylesheet and sets inline styles, so each of
+   these is stated explicitly (not `inherit`, which picks up TinyMCE's own
+   value rather than the banner's) and marked !important to beat it.
+   `font-size` etc. are inherited from the wrapper so the responsive
+   text-3xl/4xl/6xl steps still apply. */
+.banner__title > div,
+.banner__caption > div,
+.banner__title .mce-content-body,
+.banner__caption .mce-content-body,
+.banner__title .mce-content-body > p,
+.banner__caption .mce-content-body > p {
+  display: block !important;
+  width: 100% !important;
+  max-width: none !important;
+  float: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: center !important;
+  font-size: inherit;
+  font-weight: inherit;
+  font-family: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  color: inherit;
 }

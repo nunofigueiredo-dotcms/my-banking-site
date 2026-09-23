@@ -19,7 +19,7 @@ interface MobileNavProps {
 export function MobileNav({ navItems }: MobileNavProps) {
   return (
     <Sheet>
-      <SheetTrigger className="md:hidden">
+      <SheetTrigger asChild className="md:hidden">
         <Button variant="ghost" size="icon" className="text-foreground">
           <Menu className="h-7 w-7" />
           <span className="sr-only">Toggle navigation menu</span>

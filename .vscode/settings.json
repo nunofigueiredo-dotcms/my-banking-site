@@ -1,0 +1,7 @@
+{
+  // Open links from the terminal (e.g. `npm run dev` output) in VS Code's
+  // built-in Simple Browser instead of an external browser.
+  "workbench.externalUriOpeners": {
+    "localhost:3000": "vscode.simpleBrowser"
+  }
+}

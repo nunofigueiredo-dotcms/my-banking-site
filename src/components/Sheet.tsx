@@ -1,6 +1,15 @@
 "use client";
 
-import { ReactNode, useState, useEffect, useCallback } from "react";
+import {
+  ReactNode,
+  ReactElement,
+  MouseEvent,
+  useState,
+  useEffect,
+  useCallback,
+  cloneElement,
+  isValidElement,
+} from "react";
 import { createPortal } from "react-dom";
 
 interface SheetContextValue {
@@ -31,12 +40,20 @@ export function SheetTrigger({
   className?: string;
 }) {
   const { setOpen } = useContext(SheetContext);
-  if (asChild) {
-    return (
-      <div className={className} onClick={() => setOpen(true)}>
-        {children}
-      </div>
-    );
+  // asChild: render the child itself as the trigger (no extra element), so a
+  // <Button> child stays a single <button> instead of a button inside a button.
+  if (asChild && isValidElement(children)) {
+    const child = children as ReactElement<{
+      onClick?: (e: MouseEvent<HTMLElement>) => void;
+      className?: string;
+    }>;
+    return cloneElement(child, {
+      className: [child.props.className, className].filter(Boolean).join(" "),
+      onClick: (e: MouseEvent<HTMLElement>) => {
+        child.props.onClick?.(e);
+        setOpen(true);
+      },
+    });
   }
   return (
     <button className={className} onClick={() => setOpen(true)}>
