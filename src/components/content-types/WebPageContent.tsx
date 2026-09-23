@@ -2,15 +2,17 @@ import { DotCMSBlockEditorRenderer } from "@dotcms/react";
 import { DotCMSBasicContentlet } from "@dotcms/types";
 
 import type { BlockEditorNode } from "@dotcms/types";
+import { toBlocks } from "@/utils/blockEditor";
 
 type WebPageContentProps = DotCMSBasicContentlet & {
-  body?: BlockEditorNode;
+  body?: BlockEditorNode | string;
 };
 
 function WebPageContent({ body }: WebPageContentProps) {
-  return body ? (
+  const blocks = toBlocks(body);
+  return blocks ? (
     <div className="web-page-content">
-      <DotCMSBlockEditorRenderer blocks={body} />
+      <DotCMSBlockEditorRenderer blocks={blocks} />
     </div>
   ) : null;
 }

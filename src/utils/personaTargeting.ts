@@ -13,11 +13,15 @@
 
 export const PERSONA_COOKIE = "bank_persona";
 
-/** Persona identifiers as created on bank.com. */
+/**
+ * Persona keyTags. The page API accepts a keyTag wherever it accepts a persona
+ * identifier, and unlike identifiers the keyTag is the same on every dotCMS
+ * instance the site is copied to (local bank.com, worlddemobank.com).
+ */
 export const PERSONAS = {
-  MortgageSeeker: "0011c4e777742403b4c74f1ebf36599c",
-  BusinessOwner: "c03b0053a91ea923e81587cfe9aa8381",
-  SavingsShopper: "a67976af3737b32008defbdd3d17ee23",
+  MortgageSeeker: "MortgageSeeker",
+  BusinessOwner: "BusinessOwner",
+  SavingsShopper: "SavingsShopper",
 } as const;
 
 export type PersonaKey = keyof typeof PERSONAS;

@@ -1,4 +1,4 @@
-import { dotCMSClient } from "@/utils/dotCMSClient";
+import { blogContentType, dotCMSClient } from "@/utils/dotCMSClient";
 import BlogListView from "@/components/BlogListView";
 import type { Blog } from "@/types/blog";
 import type { DotCMSBasicContentlet } from "@dotcms/types";
@@ -16,7 +16,7 @@ type BlogListProps = DotCMSBasicContentlet & {
 
 export default async function BlogList(props: BlogListProps) {
   const result = await dotCMSClient.content
-    .getCollection<Blog>("Blog")
+    .getCollection<Blog>(blogContentType)
     .limit(props.quantity ?? 0);
 
   const show: BlogCardShow = {

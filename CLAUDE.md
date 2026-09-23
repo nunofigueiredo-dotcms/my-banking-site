@@ -28,6 +28,14 @@ NEXT_PUBLIC_DOTCMS_MODE=development
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
+The same site also runs as `worlddemobank.com` on awesomedemo-dev
+(`https://awesomedemo-dev.dotcms.dev`, site id `746fd4eddfb0a5a9e9769850b05f0dea`,
+language 1). Point `.env.local` there and add `NEXT_PUBLIC_DOTCMS_BLOG_TYPE=BankBlog`.
+That instance already had unrelated `Banner`, `Blog` and `Product` types, so bank.com's
+versions live there as `BankBanner`, `BankBlog` and `BankProductCard`; the component
+registry maps both names. It also returns Block Editor fields as JSON strings, which
+`src/utils/blockEditor.ts` normalizes.
+
 ## Key Patterns
 
 - All dotCMS types come from `@dotcms/types`; no `any` types
@@ -71,7 +79,9 @@ own Velocity site (`:8082`), but not through this app.
 
 Targeting is therefore resolved locally, mirroring those rules' campaign keywords:
 
-- `src/utils/personaTargeting.ts` — `utm_campaign` keyword → persona id map. **Keep
+- `src/utils/personaTargeting.ts` — `utm_campaign` keyword → persona keyTag map
+  (the page API accepts a keyTag in place of the persona id, and keyTags are the
+  same on every instance). **Keep
   these keywords in sync with the dotCMS rules** ("Persona: `<name>` — campaign &
   intent" on bank.com); they're intentionally duplicated so the site personalizes
   headlessly while the rules stay the documented source of truth.

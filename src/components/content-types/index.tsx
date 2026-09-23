@@ -12,12 +12,19 @@ import WebPageContent from "./WebPageContent";
 // Blog, WebPageContentProps). Because component props are contravariant, no
 // single concrete type accepts all of them, and DotCMSLayoutBody's own
 // `components` prop is typed with `ComponentType<any>` for this reason.
+//
+// The Bank* aliases are the same types under the names used on worlddemobank.com,
+// where the shared awesomedemo-dev instance already has unrelated Banner, Blog
+// and Product types.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const pageComponents: Record<string, ComponentType<any>> = {
   ArticleAdvise,
   Banner,
+  BankBanner: Banner,
+  BankBlog: BlogCard,
   BankCard,
   BankProduct,
+  BankProductCard: ProductCard,
   Blog: BlogCard,
   Product: ProductCard,
   SectionHeading,

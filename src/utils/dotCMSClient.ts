@@ -19,6 +19,10 @@ export const dotCMSClient = createDotCMSClient({
 // perfectly fine. Unset means language 1, which is what bank.com relies on.
 export const dotCMSLanguageId = process.env.NEXT_PUBLIC_DOTCMS_LANGUAGE_ID;
 
+// Blog posts are `Blog` on local bank.com and `BankBlog` on worlddemobank.com,
+// where the shared instance already has an unrelated `Blog` type.
+export const blogContentType = process.env.NEXT_PUBLIC_DOTCMS_BLOG_TYPE || "Blog";
+
 // DotCMSLayoutBody defaults to "production" when no mode is passed, which
 // skips the data-dot-* attributes UVE's edit overlay needs — so this must be
 // threaded through explicitly rather than relying on the default.

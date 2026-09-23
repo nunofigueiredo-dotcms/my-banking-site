@@ -1,3 +1,5 @@
+import { blogContentType } from "@/utils/dotCMSClient";
+
 export const navigationQuery = `
 DotNavigation(uri: "/", depth: 2) {
     href
@@ -18,21 +20,13 @@ export const blogListGraphQL = {
 export const blogDetailGraphQL = {
   page: `
         urlContentMap {
-            ... on Blog {
+            ... on ${blogContentType} {
                 title
                 description
                 modDate
                 urlTitle
                 body {
                     json
-                }
-                author {
-                    firstName
-                    lastName
-                    image {
-                        idPath
-                        title
-                    }
                 }
                 image {
                     idPath
