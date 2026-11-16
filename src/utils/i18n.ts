@@ -37,6 +37,8 @@ export const LOCALE_HEADER = "x-bank-locale";
 export const PATH_HEADER = "x-bank-path";
 /** A dotCMS language ID from ?language_id=, which the Universal Visual Editor sends. */
 export const LANGUAGE_ID_HEADER = "x-bank-language-id";
+/** "EDIT" or "PREVIEW" from ?mode=, which the Universal Visual Editor sends. */
+export const UVE_MODE_HEADER = "x-bank-uve-mode";
 
 export function isLocale(value: string | undefined | null): value is Locale {
   return LOCALES.some((l) => l.code === value);

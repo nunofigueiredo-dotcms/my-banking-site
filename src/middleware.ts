@@ -13,6 +13,7 @@ import {
   LANGUAGE_ID_HEADER,
   LOCALE_HEADER,
   PATH_HEADER,
+  UVE_MODE_HEADER,
   countrySiteFor,
   splitLocale,
 } from "@/utils/i18n";
@@ -49,6 +50,14 @@ export function middleware(request: NextRequest) {
     headers.set(LANGUAGE_ID_HEADER, languageId);
   } else {
     headers.delete(LANGUAGE_ID_HEADER);
+  }
+  // Inside the editor (?mode=EDIT_MODE or PREVIEW_MODE) pages are requested
+  // in their working version, so drafts and unpublished changes show there.
+  const mode = { EDIT_MODE: "EDIT", PREVIEW_MODE: "PREVIEW" }[request.nextUrl.searchParams.get("mode") ?? ""];
+  if (mode) {
+    headers.set(UVE_MODE_HEADER, mode);
+  } else {
+    headers.delete(UVE_MODE_HEADER);
   }
 
   let response: NextResponse;
