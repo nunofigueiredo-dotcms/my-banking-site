@@ -26,21 +26,34 @@ interface DotCMSLanguage {
   countryCode?: string;
 }
 
-/**
- * The instance's languages by ISO code ("es-es"). IDs differ between
- * instances, so they are read from dotCMS (and cached for an hour).
- */
-const dotCMSLanguages = cache(async (): Promise<Record<string, DotCMSLanguage>> => {
+async function fetchLanguages(options: RequestInit): Promise<DotCMSLanguage[] | null> {
   try {
     const res = await fetch(`${DOTCMS_HOST}/api/v2/languages`, {
+      ...options,
       headers: { Authorization: `Bearer ${process.env.NEXT_PUBLIC_DOTCMS_AUTH_TOKEN}` },
-      next: { revalidate: 3600 },
+      // A stopped dotCMS Cloud environment redirects to an HTML status page.
+      redirect: "error",
     });
-    const { entity } = (await res.json()) as { entity: DotCMSLanguage[] };
-    return Object.fromEntries(entity.map((l) => [l.isoCode.toLowerCase(), l]));
+    const body = (await res.json()) as { entity?: DotCMSLanguage[] };
+    return Array.isArray(body.entity) ? body.entity : null;
   } catch {
-    return {};
+    return null;
   }
+}
+
+/**
+ * The instance's languages by ISO code ("es-es"). IDs differ between
+ * instances, so they are read from dotCMS and cached for an hour. If the
+ * cached copy is unusable (it was fetched while dotCMS was down), they're
+ * fetched again uncached rather than leaving the site without languages
+ * until the cache expires.
+ */
+const dotCMSLanguages = cache(async (): Promise<Record<string, DotCMSLanguage>> => {
+  const languages =
+    (await fetchLanguages({ next: { revalidate: 3600 } })) ??
+    (await fetchLanguages({ cache: "no-store" })) ??
+    [];
+  return Object.fromEntries(languages.map((l) => [l.isoCode.toLowerCase(), l]));
 });
 
 /** dotCMS language IDs by ISO code ("es-es" → 2). */
