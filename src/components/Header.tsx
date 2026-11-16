@@ -53,7 +53,7 @@ async function countryNavigation(path: string, languageId: number): Promise<Head
  * On a country site: that site's own menu and a way back to the main site.
  */
 export default async function Header({ navItems, logo, logoAlt = "Logo" }: HeaderProps) {
-  const [{ locale, path, country, languageId }, t] = await Promise.all([
+  const [{ locale, path, country, languageId, uiLanguage }, t] = await Promise.all([
     getRequestLanguage(),
     getTranslator(),
   ]);
@@ -83,7 +83,7 @@ export default async function Header({ navItems, logo, logoAlt = "Logo" }: Heade
       label: l.label,
       short: l.short,
       href: localizeHref(path, l.code),
-      active: l.code === locale,
+      active: l.code === uiLanguage,
     }));
   }
 

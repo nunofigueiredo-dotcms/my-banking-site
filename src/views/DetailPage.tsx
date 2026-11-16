@@ -1,7 +1,8 @@
 "use client";
 
 import DotCMSImage from "@/components/DotCMSImage";
-import { DotCMSBlockEditorRenderer, useEditableDotCMSPage } from "@dotcms/react";
+import { DotCMSBlockEditorRenderer } from "@dotcms/react";
+import { useEditablePage } from "@/utils/useEditablePage";
 import type { DotCMSComposedPageResponse, DotCMSPageResponse } from "@dotcms/types";
 import type { BlogURLContentMap } from "@/types/blog";
 import Link from "next/link";
@@ -14,7 +15,7 @@ interface DetailPageProps {
 }
 
 export function DetailPage({ pageContent, related = [] }: DetailPageProps) {
-  const editablePage = useEditableDotCMSPage(pageContent);
+  const editablePage = useEditablePage(pageContent);
   const pageAsset = editablePage?.pageAsset;
   const { title, image, body, publishDate } =
     (pageAsset?.urlContentMap as BlogURLContentMap) ?? {};

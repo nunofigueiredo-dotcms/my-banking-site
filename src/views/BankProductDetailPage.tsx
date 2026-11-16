@@ -1,7 +1,7 @@
 "use client";
 
 import DotCMSImage from "@/components/DotCMSImage";
-import { useEditableDotCMSPage } from "@dotcms/react";
+import { useEditablePage } from "@/utils/useEditablePage";
 import type { DotCMSComposedPageResponse, DotCMSPageResponse } from "@dotcms/types";
 import type { BankProductURLContentMap } from "@/types/bankProduct";
 
@@ -10,7 +10,7 @@ interface BankProductDetailPageProps {
 }
 
 export function BankProductDetailPage({ pageContent }: BankProductDetailPageProps) {
-  const editablePage = useEditableDotCMSPage(pageContent);
+  const editablePage = useEditablePage(pageContent);
   const pageAsset = editablePage?.pageAsset;
   const item = pageAsset?.urlContentMap as BankProductURLContentMap | undefined;
 
