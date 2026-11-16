@@ -10,6 +10,7 @@ import { DetailPage } from "@/views/DetailPage";
 import type { BlogURLContentMap } from "@/types/blog";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import UntranslatedNotice from "@/components/UntranslatedNotice";
 
 interface PageProps {
   params: Promise<{ slug: string[] }>;
@@ -68,6 +69,7 @@ export default async function BlogDetailPage({ params }: PageProps) {
       {layout?.header && (
         <Header navItems={navItems} />
       )}
+      <UntranslatedNotice path={path} />
       <DetailPage pageContent={pageContent} related={related} />
       {layout?.footer && <Footer />}
     </>

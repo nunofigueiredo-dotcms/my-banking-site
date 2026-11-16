@@ -4,11 +4,13 @@ import type { Metadata } from "next";
 import { getDotCMSPage, getPageSeoDescription } from "@/utils/getDotCMSPage";
 import { navigationQuery } from "@/utils/queries";
 import { buildPageMetadata } from "@/utils/seo";
+import { languageAlternates } from "@/utils/hreflang";
 import { toIsoDate, webPageJsonLd } from "@/utils/structuredData";
 import JsonLd from "@/components/JsonLd";
 import { Page } from "@/views/Page";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import UntranslatedNotice from "@/components/UntranslatedNotice";
 import { PERSONA_COOKIE, resolvePersona } from "@/utils/personaTargeting";
 
 interface PageProps {
@@ -25,9 +27,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const path = resolvePath(slug);
 
   try {
-    const [pageData, seoDescription] = await Promise.all([
+    const [pageData, seoDescription, alternates] = await Promise.all([
       getDotCMSPage(path),
       getPageSeoDescription(path),
+      languageAlternates(path),
     ]);
     if (!pageData) return { title: "Not found" };
 
@@ -35,7 +38,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return buildPageMetadata({
       title: page?.friendlyName || page?.title,
       description: seoDescription,
-      path,
+      path: alternates.canonicalPath,
+      languages: alternates.languages,
     });
   } catch {
     return { title: "Not found" };
@@ -79,6 +83,7 @@ export default async function CatchAllPage({ params, searchParams }: PageProps) 
         })}
       />
       {layout?.header && <Header navItems={navItems} />}
+      <UntranslatedNotice path={path} />
       <Page pageContent={pageContent} />
       {layout?.footer && <Footer />}
     </>

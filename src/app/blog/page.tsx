@@ -10,6 +10,7 @@ import { BlogListingPage } from "@/views/BlogListingPage";
 import BlogList from "@/components/content-types/BlogList";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import UntranslatedNotice from "@/components/UntranslatedNotice";
 
 const PATH = "/blog";
 const FALLBACK_DESCRIPTION = "Read our latest articles.";
@@ -68,6 +69,7 @@ export default async function BlogPage() {
         })}
       />
       {layout?.header && <Header navItems={navItems} />}
+      <UntranslatedNotice path={PATH} />
       <BlogListingPage pageContent={pageContent} slots={slots} />
       {layout?.footer && <Footer />}
     </>

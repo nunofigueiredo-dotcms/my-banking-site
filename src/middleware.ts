@@ -8,6 +8,63 @@ import {
   personaFromTags,
   serializeAccruedTags,
 } from "@/utils/tagAccrual";
+import {
+  DEFAULT_LOCALE,
+  LANGUAGE_ID_HEADER,
+  LOCALE_HEADER,
+  PATH_HEADER,
+  countrySiteFor,
+  splitLocale,
+} from "@/utils/i18n";
+
+/**
+ * Two jobs, for every page request:
+ *
+ * 1. Language (see src/utils/i18n.ts). /es/about-us is served by the same
+ *    route as /about-us, with the language passed down in request headers;
+ *    the browser keeps the /es/ URL. /en/… redirects to the unprefixed URL,
+ *    and a prefix in front of a country site (/es/de) is dropped, because a
+ *    country site's language is fixed.
+ *
+ * 2. Persona, on the homepage, About Us and the blog only (see applyPersona).
+ */
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const { locale, path } = splitLocale(pathname);
+
+  const isEnglishPrefix = pathname === "/en" || pathname.startsWith("/en/");
+  if (isEnglishPrefix || (locale !== DEFAULT_LOCALE && countrySiteFor(path))) {
+    const url = request.nextUrl.clone();
+    url.pathname = isEnglishPrefix ? pathname.slice(3) || "/" : path;
+    return NextResponse.redirect(url, 308);
+  }
+
+  const headers = new Headers(request.headers);
+  headers.set(LOCALE_HEADER, locale);
+  headers.set(PATH_HEADER, path);
+  // The Universal Visual Editor loads pages with ?language_id= when an editor
+  // switches language; that wins over the URL prefix.
+  const languageId = request.nextUrl.searchParams.get("language_id");
+  if (languageId && /^\d+$/.test(languageId)) {
+    headers.set(LANGUAGE_ID_HEADER, languageId);
+  } else {
+    headers.delete(LANGUAGE_ID_HEADER);
+  }
+
+  let response: NextResponse;
+  if (path === pathname) {
+    response = NextResponse.next({ request: { headers } });
+  } else {
+    const url = request.nextUrl.clone();
+    url.pathname = path;
+    response = NextResponse.rewrite(url, { request: { headers } });
+  }
+
+  if (path === "/" || path === "/about-us" || path === "/blog" || path.startsWith("/blog/")) {
+    applyPersona(request, response, path);
+  }
+  return response;
+}
 
 /**
  * Persists a visitor's persona for the rest of the session.
@@ -22,8 +79,7 @@ import {
  * The page itself resolves the persona per request, but a Server Component
  * cannot set cookies — so both writes happen here.
  */
-export function middleware(request: NextRequest) {
-  const response = NextResponse.next();
+function applyPersona(request: NextRequest, response: NextResponse, path: string) {
   const params = request.nextUrl.searchParams;
 
   // An explicit ?persona= override wins, then the campaign keywords.
@@ -37,13 +93,13 @@ export function middleware(request: NextRequest) {
       sameSite: "lax",
       httpOnly: false, // readable in the browser so the demo can show it
     });
-    return response;
+    return;
   }
 
   // No campaign signal: accrue tags from the article being read, and assign a
   // persona once the accrued profile is decisive.
-  const slug = articleSlug(request.nextUrl.pathname);
-  if (!slug) return response;
+  const slug = articleSlug(path);
+  if (!slug) return;
 
   const accrued = accrueArticle(
     parseAccruedTags(request.cookies.get(TAGS_COOKIE)?.value),
@@ -58,7 +114,7 @@ export function middleware(request: NextRequest) {
 
   // An existing assignment stands: a visitor who arrived on a campaign should
   // not be re-bucketed by one incidental article.
-  if (request.cookies.get(PERSONA_COOKIE)?.value) return response;
+  if (request.cookies.get(PERSONA_COOKIE)?.value) return;
 
   const persona = personaFromTags(accrued);
   if (persona) {
@@ -68,12 +124,11 @@ export function middleware(request: NextRequest) {
       httpOnly: false,
     });
   }
-
-  return response;
 }
 
 export const config = {
-  // The homepage and top-level pages, where a campaign can arrive, plus the
-  // blog, where reading an article accrues its tags.
-  matcher: ["/", "/about-us", "/blog/:path*"],
+  // Every page, but not Next.js assets, dotCMS images (/dA, proxied by
+  // next.config.ts), API routes or files with an extension. An earlier
+  // match-everything matcher broke every route, so assets stay excluded.
+  matcher: ["/((?!_next/|dA/|api/|.*\\.[a-zA-Z0-9]+$).*)"],
 };

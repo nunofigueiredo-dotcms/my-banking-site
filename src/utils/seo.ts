@@ -27,19 +27,31 @@ export function buildPageMetadata({
   path,
   imageUrl,
   type = "website",
+  languages,
 }: {
   title?: string;
   description?: string;
   path?: string;
   imageUrl?: string;
   type?: "website" | "article";
+  /** hreflang alternates: language code → path (see utils/hreflang.ts). */
+  languages?: Record<string, string>;
 }): Metadata {
   const url = toAbsoluteUrl(path || "/") || undefined;
   const image = toAbsoluteUrl(imageUrl || DEFAULT_OG_IMAGE);
   return {
     title: title || "Page",
     description,
-    alternates: { canonical: url },
+    alternates: {
+      canonical: url,
+      ...(languages
+        ? {
+            languages: Object.fromEntries(
+              Object.entries(languages).map(([lang, p]) => [lang, toAbsoluteUrl(p)])
+            ),
+          }
+        : {}),
+    },
     openGraph: {
       title,
       description,

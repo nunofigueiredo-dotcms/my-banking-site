@@ -91,9 +91,11 @@ Targeting is therefore resolved locally, mirroring those rules' campaign keyword
   headlessly while the rules stay the documented source of truth.
 - `src/middleware.ts` — resolves the persona per request and writes it to a
   `bank_persona` cookie so the assignment survives the rest of the session (a
-  Server Component can't set cookies). Matcher is scoped to `/`, `/about-us`,
-  `/blog/:path*` — broadening it to match everything has previously returned an
-  empty 200 response for every route with no error, so keep it narrow.
+  Server Component can't set cookies). The persona part only runs for `/`,
+  `/about-us` and `/blog/*`. The matcher itself covers every page (for the
+  language prefix, below) but excludes `_next/`, `dA/`, `api/` and files with
+  an extension: an earlier match-everything matcher returned an empty 200 for
+  every route, so keep assets excluded.
 - `src/app/[[...slug]]/page.tsx` resolves precedence (UVE's
   `com.dotmarketing.persona.id` → `?persona=` override → `?utm_campaign=` → the
   cookie) and passes the result to `getDotCMSPage(path, graphql, personaId)`.
@@ -103,3 +105,32 @@ Test a persona end to end:
 curl -c jar.txt "http://localhost:3000/?utm_campaign=mortgage" -o /dev/null
 curl -b jar.txt "http://localhost:3000/"   # persona persists, no parameter needed
 ```
+
+## Languages and country sites (worlddemobank.com)
+
+Two ways of choosing a language coexist (`src/utils/i18n.ts`):
+
+- **Main site, chosen by the visitor.** English at the root, Spanish under
+  `/es/…`. The middleware strips the prefix and passes the language in request
+  headers; `getRequestLanguage()` (`src/utils/languages.ts`) turns it into a
+  dotCMS language ID, looked up by ISO code because IDs differ per instance.
+  The same dotCMS page is requested in that language. The instance falls back
+  to English for anything untranslated; `UntranslatedNotice` says so, and
+  `utils/hreflang.ts` only announces languages a page really has (an
+  untranslated `/es/…` URL is canonicalised to the English one).
+- **Country sites, chosen by the URL.** `/de` is a dotCMS folder of
+  German-only pages and content. Everything under it is requested in German
+  whatever the selector says, and `/es/de/…` redirects to `/de/…`. The folder
+  is "Show on Menu" (title "Deutschland"), so it appears in the main menu of
+  every language; the header shows those items apart, with a globe icon. On a
+  country site the header shows that folder's own menu (Navigation REST API)
+  and a link back to the international site, and no language selector.
+
+The Universal Visual Editor's `?language_id=` wins over the URL prefix on the
+main site. Header labels are dotCMS Language Variables (`bank.*` keys, System
+Host), with defaults in `languages.ts`; menu items use `bank.nav.<path>`.
+
+Content is provisioned by `docs/bank-languages.py` in the generaldemos
+workspace (Spanish versions of the home and About Us pages, the `/de` folder,
+its pages and content, and the language variables). To add a country, add it
+to `COUNTRY_SITES` and create its folder and pages in its language.
