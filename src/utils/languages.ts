@@ -140,12 +140,13 @@ const DEFAULT_LABELS: Record<string, Partial<Record<UiLanguage, string>>> = {
     de: "Internationale Website",
   },
   // Shown in the visual editor only; {country}, {language} and {path} are
-  // filled in. The editor can't switch to a language the current page doesn't
-  // have, so the country site has to be opened from outside the page.
+  // filled in. The main-site menu pages have a version in each country's
+  // language for this (docs/bank-languages.py), since the editor only
+  // switches to a language the current page has.
   "editor.countryLanguage": {
-    en: "{country} pages exist in {language} only, and the editor can't switch to {language} from this page. Open them from Site Browser, in the {path} folder.",
-    es: "Las páginas de {country} solo existen en {language} y el editor no puede cambiar a ese idioma desde esta página. Ábrelas desde el Site Browser, en la carpeta {path}.",
-    de: "Die Seiten von {country} gibt es nur auf {language}, und der Editor kann von dieser Seite aus nicht dorthin wechseln. Öffnen Sie sie im Site Browser, im Ordner {path}.",
+    en: "{country} pages exist in {language} only. Switch the editor's language (top right) to {language}, then click {country} again. You can also open them from Site Browser, in the {path} folder.",
+    es: "Las páginas de {country} solo existen en {language}. Cambia el idioma del editor (arriba a la derecha) a {language} y vuelve a hacer clic en {country}. También puedes abrirlas desde el Site Browser, en la carpeta {path}.",
+    de: "Die Seiten von {country} gibt es nur auf {language}. Stellen Sie die Sprache des Editors (oben rechts) auf {language} um und klicken Sie erneut auf {country}. Sie können sie auch im Site Browser im Ordner {path} öffnen.",
   },
   "notice.untranslated": {
     en: "This page isn't available in your language yet, so it's shown in English.",
