@@ -4,7 +4,8 @@ import { Globe } from "lucide-react";
 import type { DotCMSNavigationItem } from "@dotcms/types";
 import { Button } from "@/components/Button";
 import { LOCALES, countrySiteFor, localizeHref } from "@/utils/i18n";
-import { getRequestLanguage, getTranslator } from "@/utils/languages";
+import { countryLanguage, getRequestLanguage, getTranslator } from "@/utils/languages";
+import { CountryLink } from "./CountryLink";
 import { MobileNav, type HeaderLanguage, type HeaderLink } from "./MobileNav";
 
 const DOTCMS_HOST = process.env.NEXT_PUBLIC_DOTCMS_HOST || "http://localhost:8082";
@@ -75,9 +76,23 @@ export default async function Header({ navItems, logo, logoAlt = "Logo" }: Heade
         target: item.target || undefined,
       }));
     // Country sites keep their own name ("Deutschland") in every language.
-    countryLinks = navItems
-      .filter((item) => countrySiteFor(item.href))
-      .map((item) => ({ href: item.href, title: item.title, hrefLang: countrySiteFor(item.href)?.hreflang }));
+    countryLinks = await Promise.all(
+      navItems.flatMap((item) => {
+        const site = countrySiteFor(item.href);
+        if (!site) return [];
+        return [
+          countryLanguage(site).then(({ id, editorName }) => ({
+            href: item.href,
+            title: item.title,
+            hrefLang: site.hreflang,
+            languageId: id,
+            editorHint: t("editor.countryLanguage")
+              .replaceAll("{country}", item.title)
+              .replaceAll("{language}", editorName),
+          })),
+        ];
+      })
+    );
     languages = LOCALES.map((l) => ({
       code: l.code,
       label: l.label,
@@ -132,15 +147,17 @@ export default async function Header({ navItems, logo, logoAlt = "Logo" }: Heade
               className="hidden md:flex items-center gap-1"
             >
               {countryLinks.map((item) => (
-                <Link
+                <CountryLink
                   key={item.href}
                   href={item.href}
                   hrefLang={item.hrefLang}
+                  languageId={item.languageId}
+                  editorHint={item.editorHint}
                   className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground px-3 py-2 rounded-full font-medium transition-colors"
                 >
                   <Globe className="h-4 w-4" aria-hidden="true" />
                   {item.title}
-                </Link>
+                </CountryLink>
               ))}
             </nav>
           )}

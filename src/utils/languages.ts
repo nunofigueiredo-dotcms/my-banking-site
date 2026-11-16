@@ -19,22 +19,48 @@ const DOTCMS_HOST = process.env.NEXT_PUBLIC_DOTCMS_HOST || "http://localhost:808
 /** The default language's ID: NEXT_PUBLIC_DOTCMS_LANGUAGE_ID, else 1. */
 const DEFAULT_LANGUAGE_ID = Number(dotCMSLanguageId) || 1;
 
+interface DotCMSLanguage {
+  id: number;
+  isoCode: string;
+  language: string;
+  countryCode?: string;
+}
+
 /**
- * dotCMS language IDs by ISO code ("es-es" → 2). IDs differ between
+ * The instance's languages by ISO code ("es-es"). IDs differ between
  * instances, so they are read from dotCMS (and cached for an hour).
  */
-const languageIds = cache(async (): Promise<Record<string, number>> => {
+const dotCMSLanguages = cache(async (): Promise<Record<string, DotCMSLanguage>> => {
   try {
     const res = await fetch(`${DOTCMS_HOST}/api/v2/languages`, {
       headers: { Authorization: `Bearer ${process.env.NEXT_PUBLIC_DOTCMS_AUTH_TOKEN}` },
       next: { revalidate: 3600 },
     });
-    const { entity } = (await res.json()) as { entity: { id: number; isoCode: string }[] };
-    return Object.fromEntries(entity.map((l) => [l.isoCode.toLowerCase(), l.id]));
+    const { entity } = (await res.json()) as { entity: DotCMSLanguage[] };
+    return Object.fromEntries(entity.map((l) => [l.isoCode.toLowerCase(), l]));
   } catch {
     return {};
   }
 });
+
+/** dotCMS language IDs by ISO code ("es-es" → 2). */
+async function languageIds(): Promise<Record<string, number>> {
+  const languages = await dotCMSLanguages();
+  return Object.fromEntries(Object.entries(languages).map(([iso, l]) => [iso, l.id]));
+}
+
+/**
+ * A country site's language: its dotCMS ID, and its name as the visual
+ * editor's language menu shows it ("German - DE").
+ */
+export async function countryLanguage(country: CountrySite): Promise<{ id: number; editorName: string }> {
+  const language = (await dotCMSLanguages())[country.iso];
+  if (!language) return { id: DEFAULT_LANGUAGE_ID, editorName: country.label };
+  const editorName = language.countryCode
+    ? `${language.language} - ${language.countryCode}`
+    : language.language;
+  return { id: language.id, editorName };
+}
 
 /** The dotCMS language ID for a locale; the default language if the instance lacks it. */
 export async function localeLanguageId(locale: Locale): Promise<number> {
@@ -66,7 +92,7 @@ export const getRequestLanguage = cache(async (): Promise<RequestLanguage> => {
   // A country site's language is fixed by its URL.
   const country = countrySiteFor(path);
   if (country) {
-    const id = (await languageIds())[country.iso] ?? DEFAULT_LANGUAGE_ID;
+    const { id } = await countryLanguage(country);
     return { locale, path, country, languageId: id, uiLanguage: country.lang };
   }
 
@@ -99,6 +125,12 @@ const DEFAULT_LABELS: Record<string, Partial<Record<UiLanguage, string>>> = {
     en: "International site",
     es: "Sitio internacional",
     de: "Internationale Website",
+  },
+  // Shown in the visual editor only; {country} and {language} are filled in.
+  "editor.countryLanguage": {
+    en: "{country} is edited in its own language. Switch the editor's language (top right) to {language}, then click {country} again.",
+    es: "{country} se edita en su propio idioma. Cambia el idioma del editor (arriba a la derecha) a {language} y vuelve a hacer clic en {country}.",
+    de: "{country} wird in der eigenen Sprache bearbeitet. Stellen Sie die Sprache des Editors (oben rechts) auf {language} um und klicken Sie erneut auf {country}.",
   },
   "notice.untranslated": {
     en: "This page isn't available in your language yet, so it's shown in English.",

@@ -10,12 +10,16 @@ import {
 } from "@/components/Sheet";
 import { Globe, Menu } from "lucide-react";
 import Link from "next/link";
+import { CountryLink } from "./CountryLink";
 
 export interface HeaderLink {
   href: string;
   title: string;
   target?: string;
   hrefLang?: string;
+  /** A country site's link: the language its pages exist in (see CountryLink). */
+  languageId?: number;
+  editorHint?: string;
 }
 
 export interface HeaderLanguage {
@@ -71,15 +75,17 @@ export function MobileNav({ links, countryLinks, languages, labels, ctaHref }: M
                 {labels.countries}
               </p>
               {countryLinks.map((item) => (
-                <Link
+                <CountryLink
                   key={item.href}
                   href={item.href}
                   hrefLang={item.hrefLang}
+                  languageId={item.languageId}
+                  editorHint={item.editorHint}
                   className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-lg py-2"
                 >
                   <Globe className="h-5 w-5" aria-hidden="true" />
                   {item.title}
-                </Link>
+                </CountryLink>
               ))}
             </div>
           )}
