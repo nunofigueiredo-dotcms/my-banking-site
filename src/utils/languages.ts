@@ -139,11 +139,13 @@ const DEFAULT_LABELS: Record<string, Partial<Record<UiLanguage, string>>> = {
     es: "Sitio internacional",
     de: "Internationale Website",
   },
-  // Shown in the visual editor only; {country} and {language} are filled in.
+  // Shown in the visual editor only; {country}, {language} and {path} are
+  // filled in. The editor can't switch to a language the current page doesn't
+  // have, so the country site has to be opened from outside the page.
   "editor.countryLanguage": {
-    en: "{country} is edited in its own language. Switch the editor's language (top right) to {language}, then click {country} again.",
-    es: "{country} se edita en su propio idioma. Cambia el idioma del editor (arriba a la derecha) a {language} y vuelve a hacer clic en {country}.",
-    de: "{country} wird in der eigenen Sprache bearbeitet. Stellen Sie die Sprache des Editors (oben rechts) auf {language} um und klicken Sie erneut auf {country}.",
+    en: "{country} pages exist in {language} only, and the editor can't switch to {language} from this page. Open them from Site Browser, in the {path} folder.",
+    es: "Las páginas de {country} solo existen en {language} y el editor no puede cambiar a ese idioma desde esta página. Ábrelas desde el Site Browser, en la carpeta {path}.",
+    de: "Die Seiten von {country} gibt es nur auf {language}, und der Editor kann von dieser Seite aus nicht dorthin wechseln. Öffnen Sie sie im Site Browser, im Ordner {path}.",
   },
   "notice.untranslated": {
     en: "This page isn't available in your language yet, so it's shown in English.",

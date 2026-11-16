@@ -88,7 +88,8 @@ export default async function Header({ navItems, logo, logoAlt = "Logo" }: Heade
             languageId: id,
             editorHint: t("editor.countryLanguage")
               .replaceAll("{country}", item.title)
-              .replaceAll("{language}", editorName),
+              .replaceAll("{language}", editorName)
+              .replaceAll("{path}", site.path),
           })),
         ];
       })

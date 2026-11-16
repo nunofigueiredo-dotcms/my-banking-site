@@ -21,8 +21,10 @@ interface CountryLinkProps {
  * Inside the Universal Visual Editor, navigating keeps the editor's language,
  * and a country's pages exist in its own language only, so following the
  * link in any other language ends on the editor's "error occurred while
- * loading the page" screen. There the link stays put and says how to get to
- * the country site instead: switch the editor's language first.
+ * loading the page" screen. The editor also won't switch to a language the
+ * current page doesn't have, and the page runs in a sandboxed frame that
+ * can't open the editor anywhere else. So there the link stays put and says
+ * where to open the country site instead.
  */
 export function CountryLink({ href, hrefLang, languageId, editorHint, className, children }: CountryLinkProps) {
   const [showHint, setShowHint] = useState(false);
