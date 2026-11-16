@@ -32,6 +32,9 @@ export const blogDetailGraphQL = {
                     idPath
                     title
                 }
+                conLanguage {
+                    id
+                }
             }
         }
     `,

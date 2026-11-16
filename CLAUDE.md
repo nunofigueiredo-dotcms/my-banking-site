@@ -130,6 +130,13 @@ The Universal Visual Editor's `?language_id=` wins over the URL prefix on the
 main site. Header labels are dotCMS Language Variables (`bank.*` keys, System
 Host), with defaults in `languages.ts`; menu items use `bank.nav.<path>`.
 
+A blog post's detail page exists in English only, so for a post "translated"
+means the post's own language (`urlContentMap.conLanguage`), not the page's;
+the post route passes that to `UntranslatedNotice` and `languageAlternates`.
+The bank's content types use the **World Demo Bank Translation** workflow
+("Translate with AI": dotCMS's built-in dotAI translation into `es-es`), set
+up by `docs/bank-ai-translation.py`.
+
 Content is provisioned by `docs/bank-languages.py` in the generaldemos
 workspace (Spanish versions of the home and About Us pages, the `/de` folder,
 its pages and content, and the language variables). To add a country, add it

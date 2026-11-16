@@ -31,4 +31,6 @@ export type BlogURLContentMap = Omit<DotCMSURLContentMap, "body"> & {
   body?: { json: BlockEditorNode };
   image?: BlogImage;
   author?: BlogAuthor[];
+  /** The language of the version dotCMS returned (it falls back to English). */
+  conLanguage?: { id?: number };
 };

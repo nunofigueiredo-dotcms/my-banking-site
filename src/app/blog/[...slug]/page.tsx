@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getDotCMSPage } from "@/utils/getDotCMSPage";
 import { blogDetailGraphQL } from "@/utils/queries";
 import { buildPageMetadata } from "@/utils/seo";
+import { languageAlternates } from "@/utils/hreflang";
 import { blogPostingJsonLd, toIsoDate } from "@/utils/structuredData";
 import { getRelatedPosts } from "@/utils/blogPosts";
 import JsonLd from "@/components/JsonLd";
@@ -16,20 +17,31 @@ interface PageProps {
   params: Promise<{ slug: string[] }>;
 }
 
+/** The blog post a detail page shows. */
+function postOf(pageData: Awaited<ReturnType<typeof getDotCMSPage>>): BlogURLContentMap | undefined {
+  return pageData?.pageAsset?.urlContentMap as BlogURLContentMap | undefined;
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const path = `/blog/${slug.join("/")}`;
 
   try {
-    const pageData = await getDotCMSPage(path, blogDetailGraphQL);
+    const [pageData, alternates] = await Promise.all([
+      getDotCMSPage(path, blogDetailGraphQL),
+      // Translated or not is the post's language, not the detail page's.
+      languageAlternates(path, async (id) => postOf(await getDotCMSPage(path, blogDetailGraphQL, undefined, id))
+        ?.conLanguage?.id),
+    ]);
     if (!pageData) return { title: "Not found" };
 
-    const urlContentMap = pageData.pageAsset?.urlContentMap as BlogURLContentMap | undefined;
+    const urlContentMap = postOf(pageData);
     const title = urlContentMap?.title || "Blog";
     const metadata = buildPageMetadata({
       title,
       description: urlContentMap?.description,
-      path,
+      path: alternates.canonicalPath,
+      languages: alternates.languages,
       type: "article",
     });
     // Post titles are long enough on their own; the "| World Demo Bank" template
@@ -49,7 +61,7 @@ export default async function BlogDetailPage({ params }: PageProps) {
 
   const layout = pageContent.pageAsset?.layout;
   const navItems = pageContent.content?.navigation?.children ?? [];
-  const post = pageContent.pageAsset?.urlContentMap as BlogURLContentMap | undefined;
+  const post = postOf(pageContent);
   const related = await getRelatedPosts(post?.urlTitle);
 
   return (
@@ -69,7 +81,7 @@ export default async function BlogDetailPage({ params }: PageProps) {
       {layout?.header && (
         <Header navItems={navItems} />
       )}
-      <UntranslatedNotice path={path} />
+      <UntranslatedNotice path={path} shownLanguageId={post?.conLanguage?.id} />
       <DetailPage pageContent={pageContent} related={related} />
       {layout?.footer && <Footer />}
     </>

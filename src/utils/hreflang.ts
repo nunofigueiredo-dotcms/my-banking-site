@@ -18,8 +18,16 @@ export interface LanguageAlternates {
  * the English one, so search engines don't index a duplicate.
  *
  * A country-site page has one language, its own.
+ *
+ * `languageOf` says which language dotCMS answers in when asked for one. It
+ * defaults to the page's; a URL-mapped page (a blog post) passes the
+ * content's instead, since its detail page exists in English only.
  */
-export async function languageAlternates(path: string): Promise<LanguageAlternates> {
+export async function languageAlternates(
+  path: string,
+  languageOf: (languageId: number) => Promise<number | undefined> = async (id) =>
+    (await getPageMeta(path, id)).languageId
+): Promise<LanguageAlternates> {
   const { locale, country } = await getRequestLanguage();
   if (country) {
     return { canonicalPath: path, languages: { [country.hreflang]: path } };
@@ -31,7 +39,7 @@ export async function languageAlternates(path: string): Promise<LanguageAlternat
       if (l.code === DEFAULT_LOCALE) return true;
       const id = await localeLanguageId(l.code);
       if (id === defaultId) return false; // the instance doesn't have this language
-      return (await getPageMeta(path, id)).languageId === id;
+      return (await languageOf(id)) === id;
     })
   );
 
