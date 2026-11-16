@@ -63,12 +63,12 @@ async function languageIds(): Promise<Record<string, number>> {
 }
 
 /**
- * A country site's language: its dotCMS ID, and its name as the visual
- * editor's language menu shows it ("German - DE").
+ * A language by ISO code ("de-de"): its dotCMS ID, and its name as the
+ * visual editor's language menu shows it ("German - DE").
  */
-export async function countryLanguage(country: CountrySite): Promise<{ id: number; editorName: string }> {
-  const language = (await dotCMSLanguages())[country.iso];
-  if (!language) return { id: DEFAULT_LANGUAGE_ID, editorName: country.label };
+export async function editorLanguage(iso: string, fallbackName: string): Promise<{ id: number; editorName: string }> {
+  const language = (await dotCMSLanguages())[iso];
+  if (!language) return { id: DEFAULT_LANGUAGE_ID, editorName: fallbackName };
   const editorName = language.countryCode
     ? `${language.language} - ${language.countryCode}`
     : language.language;
@@ -105,7 +105,7 @@ export const getRequestLanguage = cache(async (): Promise<RequestLanguage> => {
   // A country site's language is fixed by its URL.
   const country = countrySiteFor(path);
   if (country) {
-    const { id } = await countryLanguage(country);
+    const { id } = await editorLanguage(country.iso, country.label);
     return { locale, path, country, languageId: id, uiLanguage: country.lang };
   }
 
@@ -139,10 +139,19 @@ const DEFAULT_LABELS: Record<string, Partial<Record<UiLanguage, string>>> = {
     es: "Sitio internacional",
     de: "Internationale Website",
   },
-  // Shown in the visual editor only; {country}, {language} and {path} are
-  // filled in. The main-site menu pages have a version in each country's
-  // language for this (docs/bank-languages.py), since the editor only
-  // switches to a language the current page has.
+  // Shown in the visual editor only (see components/LanguageLink.tsx), where
+  // the editor's own language menu (top right) sets the language. {language},
+  // {country} and {path} are filled in.
+  //
+  // A language selector pill:
+  "editor.switchLanguage": {
+    en: "In the editor, the language is set at the top right. Switch it to {language} there.",
+    es: "En el editor, el idioma se elige arriba a la derecha. Cámbialo allí a {language}.",
+    de: "Im Editor wird die Sprache oben rechts gewählt. Stellen Sie sie dort auf {language} um.",
+  },
+  // A country site's link. The main-site menu pages have a version in each
+  // country's language for this (docs/bank-languages.py), since the editor
+  // only switches to a language the current page has.
   "editor.countryLanguage": {
     en: "{country} pages exist in {language} only. Switch the editor's language (top right) to {language}, then click {country} again. You can also open them from Site Browser, in the {path} folder.",
     es: "Las páginas de {country} solo existen en {language}. Cambia el idioma del editor (arriba a la derecha) a {language} y vuelve a hacer clic en {country}. También puedes abrirlas desde el Site Browser, en la carpeta {path}.",

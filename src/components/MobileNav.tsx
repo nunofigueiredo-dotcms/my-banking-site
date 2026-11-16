@@ -10,14 +10,14 @@ import {
 } from "@/components/Sheet";
 import { Globe, Menu } from "lucide-react";
 import Link from "next/link";
-import { CountryLink } from "./CountryLink";
+import { LanguageLink } from "./LanguageLink";
 
 export interface HeaderLink {
   href: string;
   title: string;
   target?: string;
   hrefLang?: string;
-  /** A country site's link: the language its pages exist in (see CountryLink). */
+  /** A country site's link: the language its pages exist in (see LanguageLink). */
   languageId?: number;
   editorHint?: string;
 }
@@ -28,6 +28,9 @@ export interface HeaderLanguage {
   short: string;
   href: string;
   active: boolean;
+  /** The language's dotCMS ID, and what to tell an editor (see LanguageLink). */
+  languageId: number;
+  editorHint: string;
 }
 
 interface MobileNavProps {
@@ -75,7 +78,7 @@ export function MobileNav({ links, countryLinks, languages, labels, ctaHref }: M
                 {labels.countries}
               </p>
               {countryLinks.map((item) => (
-                <CountryLink
+                <LanguageLink
                   key={item.href}
                   href={item.href}
                   hrefLang={item.hrefLang}
@@ -85,7 +88,7 @@ export function MobileNav({ links, countryLinks, languages, labels, ctaHref }: M
                 >
                   <Globe className="h-5 w-5" aria-hidden="true" />
                   {item.title}
-                </CountryLink>
+                </LanguageLink>
               ))}
             </div>
           )}
@@ -96,12 +99,14 @@ export function MobileNav({ links, countryLinks, languages, labels, ctaHref }: M
               </p>
               <div className="flex gap-2">
                 {languages.map((l) => (
-                  <Link
+                  <LanguageLink
                     key={l.code}
                     href={l.href}
                     hrefLang={l.code}
                     lang={l.code}
                     aria-current={l.active ? "true" : undefined}
+                    languageId={l.languageId}
+                    editorHint={l.editorHint}
                     className={
                       l.active
                         ? "px-4 py-2 rounded-full bg-primary text-primary-foreground font-medium"
@@ -109,7 +114,7 @@ export function MobileNav({ links, countryLinks, languages, labels, ctaHref }: M
                     }
                   >
                     {l.label}
-                  </Link>
+                  </LanguageLink>
                 ))}
               </div>
             </div>

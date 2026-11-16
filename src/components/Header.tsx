@@ -4,8 +4,8 @@ import { Globe } from "lucide-react";
 import type { DotCMSNavigationItem } from "@dotcms/types";
 import { Button } from "@/components/Button";
 import { LOCALES, countrySiteFor, localizeHref } from "@/utils/i18n";
-import { countryLanguage, getRequestLanguage, getTranslator } from "@/utils/languages";
-import { CountryLink } from "./CountryLink";
+import { editorLanguage, getRequestLanguage, getTranslator } from "@/utils/languages";
+import { LanguageLink } from "./LanguageLink";
 import { MobileNav, type HeaderLanguage, type HeaderLink } from "./MobileNav";
 
 const DOTCMS_HOST = process.env.NEXT_PUBLIC_DOTCMS_HOST || "http://localhost:8082";
@@ -81,7 +81,7 @@ export default async function Header({ navItems, logo, logoAlt = "Logo" }: Heade
         const site = countrySiteFor(item.href);
         if (!site) return [];
         return [
-          countryLanguage(site).then(({ id, editorName }) => ({
+          editorLanguage(site.iso, site.label).then(({ id, editorName }) => ({
             href: item.href,
             title: item.title,
             hrefLang: site.hreflang,
@@ -94,13 +94,20 @@ export default async function Header({ navItems, logo, logoAlt = "Logo" }: Heade
         ];
       })
     );
-    languages = LOCALES.map((l) => ({
-      code: l.code,
-      label: l.label,
-      short: l.short,
-      href: localizeHref(path, l.code),
-      active: l.code === uiLanguage,
-    }));
+    languages = await Promise.all(
+      LOCALES.map(async (l) => {
+        const { id, editorName } = await editorLanguage(l.iso, l.label);
+        return {
+          code: l.code,
+          label: l.label,
+          short: l.short,
+          href: localizeHref(path, l.code),
+          active: l.code === uiLanguage,
+          languageId: id,
+          editorHint: t("editor.switchLanguage").replaceAll("{language}", editorName),
+        };
+      })
+    );
   }
 
   const homeHref = country ? country.path : localizeHref("/", locale);
@@ -148,7 +155,7 @@ export default async function Header({ navItems, logo, logoAlt = "Logo" }: Heade
               className="hidden md:flex items-center gap-1"
             >
               {countryLinks.map((item) => (
-                <CountryLink
+                <LanguageLink
                   key={item.href}
                   href={item.href}
                   hrefLang={item.hrefLang}
@@ -158,7 +165,7 @@ export default async function Header({ navItems, logo, logoAlt = "Logo" }: Heade
                 >
                   <Globe className="h-4 w-4" aria-hidden="true" />
                   {item.title}
-                </CountryLink>
+                </LanguageLink>
               ))}
             </nav>
           )}
@@ -168,12 +175,14 @@ export default async function Header({ navItems, logo, logoAlt = "Logo" }: Heade
               className="hidden md:flex items-center rounded-full border border-border p-0.5 text-sm"
             >
               {languages.map((l) => (
-                <Link
+                <LanguageLink
                   key={l.code}
                   href={l.href}
                   hrefLang={l.code}
                   lang={l.code}
                   title={l.label}
+                  languageId={l.languageId}
+                  editorHint={l.editorHint}
                   aria-current={l.active ? "true" : undefined}
                   className={
                     l.active
@@ -182,7 +191,7 @@ export default async function Header({ navItems, logo, logoAlt = "Logo" }: Heade
                   }
                 >
                   {l.short}
-                </Link>
+                </LanguageLink>
               ))}
             </nav>
           )}
